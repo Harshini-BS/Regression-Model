@@ -1,0 +1,112 @@
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error, r2_score
+
+# Example dataset
+data = {
+    'Hours_Studied': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    'Marks_Scored': [30, 35, 50, 55, 65, 70, 75, 80, 88, 95]
+}
+df = pd.DataFrame(data)
+
+# 1. Print full dataset
+print("Full Dataset:")
+print(df.to_string(index=False))
+
+# Features (X) and target (y)
+X = df[['Hours_Studied']]
+y = df['Marks_Scored']
+
+# Split dataset into train (80%) and test (20%)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+# 2. Print test sample
+print("\nTest Sample:")
+test_sample = pd.concat([X_test, y_test], axis=1)
+print(test_sample.to_string(index=False))
+
+# Train model
+model = LinearRegression()
+model.fit(X_train, y_train)
+
+# Predict on test data using DataFrame with feature names
+y_pred = model.predict(X_test)
+
+# 3. Print predictions table
+print("\nPredictions on Test Data:")
+pred_table = pd.DataFrame({
+    'Hours_Studied': X_test['Hours_Studied'],
+    'Actual_Marks': y_test,
+    'Predicted_Marks': np.round(y_pred, 2)
+})
+print(pred_table.to_string(index=False))
+
+# Model evaluation
+print("\nModel Evaluation:")
+print(f"Mean Squared Error: {mean_squared_error(y_test, y_pred):.2f}")
+print(f"R² Score: {r2_score(y_test, y_pred):.2f}")
+
+# 4. Custom input prediction - properly wrapped in DataFrame
+custom_hours = float(input("\nEnter study hours to predict marks: "))
+custom_input = pd.DataFrame({'Hours_Studied': [custom_hours]})
+custom_prediction = model.predict(custom_input)
+print(f"Predicted marks for studying {custom_hours} hours: {custom_prediction[0]:.2f}")
+
+# 5. Plot the regression graph
+plt.figure(figsize=(8, 6))
+
+# Training points
+plt.scatter(X_train, y_train, color='blue', label='Training Data')
+
+# Test points
+plt.scatter(X_test, y_test, color='green', label='Test Data')
+
+# Regression line
+x_range = np.linspace(X.min(), X.max(), 100).reshape(-1, 1)
+plt.plot(x_range, model.predict(pd.DataFrame(x_range, columns=['Hours_Studied'])), color='red', label='Regression Line')
+
+plt.xlabel("Hours Studied")
+plt.ylabel("Marks Scored")
+plt.title("Linear Regression: Hours Studied vs Marks Scored")
+plt.legend()
+plt.grid(True)
+plt.show()
+
+Output:
+Full Dataset:
+ Hours_Studied  Marks_Scored
+             1            30
+             2            35
+             3            50
+             4            55
+             5            65
+             6            70
+             7            75
+             8            80
+             9            88
+            10            95
+
+Test Sample:
+ Hours_Studied  Marks_Scored
+             9            88
+             2            35
+
+Predictions on Test Data:
+ Hours_Studied  Actual_Marks  Predicted_Marks
+             9            88            89.14
+             2            35            40.86
+
+Model Evaluation:
+Mean Squared Error: 17.83
+R² Score: 0.97
+
+Enter study hours to predict marks: 8
+Predicted marks for studying 8.0 hours: 82.24
+
+
